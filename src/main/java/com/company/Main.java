@@ -4,8 +4,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // TODO: Get time
-
         if (!isCorrectArgs(args)) {
             return;
         }
@@ -14,6 +12,12 @@ public class Main {
         if (!forProperties.load(args[0])) {
             return;
         }
+
+        Sqlite sqlite = new Sqlite(forProperties.getUrlForSql());
+        Client client = new Client(forProperties.getIp(), forProperties.getPort());
+
+        Controller controller = new Controller(sqlite, client);
+        controller.work();
 
         System.out.println("Done!");
     }

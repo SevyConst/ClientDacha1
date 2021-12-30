@@ -6,3 +6,4 @@ target/
 ibnDoomConfig.properties
 *.sql
 *.db
+*.properties
