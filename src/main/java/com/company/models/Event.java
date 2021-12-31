@@ -1,9 +1,9 @@
 package com.company.models;
 
 public class Event {
-    private long id;
+    private Long id;
     private String nameEvent;
-    private long timeEvent;
+    private Long timeEvent;
     private int temperature;
     private int processor;
     private int usedMemory;

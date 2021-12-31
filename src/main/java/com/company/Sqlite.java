@@ -1,33 +1,118 @@
 package com.company;
 
+import com.company.models.Event;
+import com.company.models.Events;
+
 import java.sql.*;
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Sqlite {
     private final String url;
+
+    // Columns of the Events table
+    private static final String COLUMN_ID = "id";
+    private static final String COLUMN_NAME_EVENT = "name_event";
+    private static final String COLUMN_TIME_EVENT = "time_event";
+    private static final String COLUMN_SENT = "sent";
+    private static final String COLUMN_TEMPERATURE = "temperature";
+    private static final String COLUMN_PROCESSOR = "processor";
+    private static final String COLUMN_USED_MEMORY = "used_memory";
+    private static final String COLUMN_FREE_MEMORY = "free_memory";
+    private static final String COLUMN_SENT_TIME = "sent_time";
+    private static final String COLUMN_SENT_APPROVED = "sent_approved";
+    private static final String COLUMN_SEN_APPROVED_TIME = "sent_approved_time";
+    private static final String COLUMN_ADDIT_INFO = "addit_info";
+
+    private static final String trueStr = "Y";
+    private static final String falseStr = "N";
 
     Sqlite(String url) {
         this.url = url;
     }
 
-    private void connectForRead(String selectSql) {
+    private static final String SQL_INSERT_START = "INSERT INTO events (name_event, time_event) VALUES('start', ?)";
+    void insertStart() {
         try (Connection connection = DriverManager.getConnection(url);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(selectSql)) {
+             PreparedStatement statement = connection.prepareStatement(SQL_INSERT_START)) {
+
+            statement.setLong(1, Instant.now().toEpochMilli());
+            statement.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private static final String SQL_INSERT_START = "INSERT INTO events (name_event, time_event) VALUES('start', ?)";
-    void insertStart() {
-        try (Connection connection = DriverManager
-                .getConnection(url)) {
-            try (PreparedStatement statement = connection.prepareStatement(SQL_INSERT_START)) {
-                statement.setLong(1, Instant.now().toEpochMilli());
-                statement.executeUpdate();
+    private static final String SQL_SELECT_NOT_APPROVED = "SELECT * FROM events WHERE sent_approved <> 'Y'";
+    Events selectNotApproved() {
+        Events events = new Events();
+        try (Connection connection = DriverManager.getConnection(url);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(SQL_SELECT_NOT_APPROVED)) {
+
+            while (resultSet.next()) {
+                Event event = new Event();
+
+                event.setId(resultSet.getLong(COLUMN_ID));
+                event.setNameEvent(resultSet.getString(COLUMN_NAME_EVENT));
+                event.setTimeEvent(resultSet.getLong(COLUMN_TIME_EVENT));
+                event.setSent(trueStr.equals(resultSet.getString(COLUMN_SENT)));
+                event.setTemperature(resultSet.getInt(COLUMN_TEMPERATURE));
+                event.setProcessor(resultSet.getInt(COLUMN_PROCESSOR));
+                event.setUsedMemory(resultSet.getInt(COLUMN_USED_MEMORY));
+                event.setFreeMemory(resultSet.getInt(COLUMN_FREE_MEMORY));
+                event.setSentTime(resultSet.getLong(COLUMN_SENT_TIME));
+                event.setSentApproved(trueStr.equals(resultSet.getString(COLUMN_SENT_APPROVED)));
+                event.setSentApprovedTime(resultSet.getLong(COLUMN_SEN_APPROVED_TIME));
+                event.setAdditInfo(resultSet.getString(COLUMN_ADDIT_INFO));
+
+                events.getEvents().add(event);
             }
+
+            return events;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    void updateSentBool(Events events) {
+
+        StringBuilder sqlUpdate = new StringBuilder("UPDATE events SET sent = 'Y', sent_time = ? WHERE id in (");
+        sqlUpdate.append(events.getEvents().stream().
+                map(event -> String.valueOf(event.getId())).
+                collect(Collectors.joining(", ")));
+        sqlUpdate.append(");");
+
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement statement = connection.prepareStatement(sqlUpdate.toString())) {
+            statement.setLong(1, Instant.now().toEpochMilli());
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void updateSentApproved(List<Long> ids) {
+
+        StringBuilder sqlUpdate =
+                new StringBuilder("UPDATE events SET sent_approved = 'Y', sent_approved_time = ? WHERE id in (");
+
+        sqlUpdate.append(ids.stream().
+                map(id -> String.valueOf(id)).
+                collect(Collectors.joining(", ")));
+
+        sqlUpdate.append(");");
+
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement statement = connection.prepareStatement(sqlUpdate.toString())) {
+            statement.setLong(1, Instant.now().toEpochMilli());
+            statement.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -1,8 +1,7 @@
 package com.company;
 
-import com.company.models.Event;
-import com.company.models.EventsResponse;
 import com.company.models.Events;
+import com.company.models.EventsResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
@@ -15,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Client {
 
-    private static final String END_OF_URL = "/events";
+    private static final String END_OF_URL = ":8080/events";
     private final String ip;
     private final int port;
 
@@ -25,39 +24,38 @@ public class Client {
     }
 
 
-    private void sendEvents(Events events) {
+    EventsResponse sendEvents(Events events) {
         try {
             URL url = new URL(ip + END_OF_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
-            Event event = new Event();
-
 
             try (OutputStream outputStream = connection.getOutputStream()) {
                 JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                gson.toJson(event, Event.class, jsonWriter);
+                gson.toJson(events, Events.class, jsonWriter);
                 jsonWriter.flush();
             } catch (IOException e) {
-
+                return null;
             }
 
             System.out.println(connection.getResponseCode());
 
             try (Reader reader = new InputStreamReader(connection.getInputStream())) {
                 EventsResponse eventsResponse = new Gson().fromJson(reader, EventsResponse.class);
-
-
                 System.out.println("response: " + new Gson().toJson(eventsResponse));
+
+                return eventsResponse;
 
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             }
         } catch (IOException | NullPointerException e) {
-            System.out.println();
             e.printStackTrace();
+            return null;
         }
     }
 }
