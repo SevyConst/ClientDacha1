@@ -9,7 +9,7 @@ public class EventsResponse {
         this.eventsIdsDelivered = eventsIdsDelivered;
     }
 
-    private long periodSent;
+    private Integer periodSent;
 
     public List<Long> getEventsIdsDelivered() {
         return eventsIdsDelivered;
@@ -19,11 +19,11 @@ public class EventsResponse {
         this.eventsIdsDelivered = eventsIdsDelivered;
     }
 
-    public long getPeriodSent() {
+    public Integer getPeriodSent() {
         return periodSent;
     }
 
-    public void setPeriodSent(long periodSent) {
+    public void setPeriodSent(Integer periodSent) {
         this.periodSent = periodSent;
     }
 }

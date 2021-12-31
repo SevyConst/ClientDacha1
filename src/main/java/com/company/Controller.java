@@ -3,6 +3,8 @@ package com.company;
 import com.company.models.Events;
 import com.company.models.EventsResponse;
 
+import java.util.concurrent.TimeUnit;
+
 public class Controller {
 
     private final Sqlite sqlite;
@@ -13,20 +15,36 @@ public class Controller {
         this.client = client;
     }
 
+    private int periodSentSec = 10;
+
     void work() {
         sqlite.insertStart();
+        updateAndSend();
+        while (true) {
 
-        Events events = sqlite.selectNotApproved();
-        EventsResponse eventsResponse = client.sendEvents(events);
-        if (null != eventsResponse) {
-            sqlite.updateSentBool(events);
-            sqlite.updateSentApproved(eventsResponse.getEventsIdsDelivered());
+            try {
+                TimeUnit.SECONDS.sleep(periodSentSec);
+            } catch (InterruptedException e) {
+                break;
+            }
+            sqlite.insertPing();
+            updateAndSend();
+
         }
 
+    }
 
+    void updateAndSend() {
+        Events events = sqlite.selectNotApproved();
+        EventsResponse eventsResponse = client.sendEvents(events);
+        if (null != eventsResponse && null != eventsResponse.getEventsIdsDelivered()) {
+            sqlite.updateSentBool(events);
+            sqlite.updateSentApprovedBool(eventsResponse.getEventsIdsDelivered());
 
-
-        System.out.println("done!");
+            if(null != eventsResponse.getPeriodSent()) {
+                periodSentSec = eventsResponse.getPeriodSent();
+            }
+        }
     }
 
 }

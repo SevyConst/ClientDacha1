@@ -97,7 +97,7 @@ public class Sqlite {
         }
     }
 
-    void updateSentApproved(List<Long> ids) {
+    void updateSentApprovedBool(List<Long> ids) {
 
         StringBuilder sqlUpdate =
                 new StringBuilder("UPDATE events SET sent_approved = 'Y', sent_approved_time = ? WHERE id in (");
@@ -110,6 +110,19 @@ public class Sqlite {
 
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(sqlUpdate.toString())) {
+            statement.setLong(1, Instant.now().toEpochMilli());
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static final String SQL_INSERT_PING = "INSERT INTO events (name_event, time_event) VALUES('event', ?)";
+    void insertPing() {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement statement = connection.prepareStatement(SQL_INSERT_PING)) {
+
             statement.setLong(1, Instant.now().toEpochMilli());
             statement.executeUpdate();
 
