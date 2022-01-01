@@ -1,8 +1,10 @@
 package com.company;
 
+import com.company.models.Event;
 import com.company.models.Events;
 import com.company.models.EventsResponse;
 
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 public class Controller {
@@ -18,7 +20,8 @@ public class Controller {
     private int periodSentSec = 10;
 
     void work() {
-        sqlite.insertStart();
+
+        sqlite.insertStart(fillEvent());
         updateAndSend();
         while (true) {
 
@@ -27,7 +30,7 @@ public class Controller {
             } catch (InterruptedException e) {
                 break;
             }
-            sqlite.insertPing();
+            sqlite.insertPing(fillEvent());
             updateAndSend();
 
         }
@@ -47,4 +50,9 @@ public class Controller {
         }
     }
 
+    private Event fillEvent() {
+        Event event = new Event();
+        event.setTimeEvent(Instant.now().toEpochMilli());
+        return event;
+    }
 }

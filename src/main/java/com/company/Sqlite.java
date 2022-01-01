@@ -33,11 +33,11 @@ public class Sqlite {
     }
 
     private static final String SQL_INSERT_START = "INSERT INTO events (name_event, time_event) VALUES('start', ?)";
-    void insertStart() {
+    void insertStart(Event event) {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(SQL_INSERT_START)) {
 
-            statement.setLong(1, Instant.now().toEpochMilli());
+            statement.setLong(1, event.getTimeEvent());
             statement.executeUpdate();
 
         } catch (SQLException e) {
@@ -119,11 +119,11 @@ public class Sqlite {
     }
 
     private static final String SQL_INSERT_PING = "INSERT INTO events (name_event, time_event) VALUES('event', ?)";
-    void insertPing() {
+    void insertPing(Event event) {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(SQL_INSERT_PING)) {
 
-            statement.setLong(1, Instant.now().toEpochMilli());
+            statement.setLong(1, event.getTimeEvent());
             statement.executeUpdate();
 
         } catch (SQLException e) {
