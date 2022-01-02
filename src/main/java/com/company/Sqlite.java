@@ -2,6 +2,7 @@ package com.company;
 
 import com.company.models.Event;
 import com.company.models.Events;
+import org.slf4j.Logger;
 
 import java.sql.*;
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class Sqlite {
     private final String url;
+    private final Logger logger;
 
     // Columns of the Events table
     private static final String COLUMN_ID = "id";
@@ -28,8 +30,9 @@ public class Sqlite {
     private static final String trueStr = "Y";
     private static final String falseStr = "N";
 
-    Sqlite(String url) {
+    Sqlite(String url, Logger logger) {
         this.url = url;
+        this.logger = logger;
     }
 
     private static final String SQL_INSERT_START = "INSERT INTO events (name_event, time_event) VALUES('start', ?)";
@@ -41,7 +44,7 @@ public class Sqlite {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("can't insert start event to sqlite", e);
         }
     }
 
@@ -74,7 +77,7 @@ public class Sqlite {
             return events;
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("can't select from sqlite", e);
             return null;
         }
     }
@@ -93,7 +96,7 @@ public class Sqlite {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("can't update info about sending (sqlite)", e);
         }
     }
 
@@ -114,7 +117,8 @@ public class Sqlite {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("can't update info about approval (sqlite)", e);
+
         }
     }
 
@@ -127,7 +131,7 @@ public class Sqlite {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("can't insert info about ping (sqlite)", e);
         }
     }
 }

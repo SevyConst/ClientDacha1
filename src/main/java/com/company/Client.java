@@ -5,6 +5,7 @@ import com.company.models.EventsResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
+import org.slf4j.Logger;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -14,47 +15,51 @@ import java.nio.charset.StandardCharsets;
 
 public class Client {
 
-    private static final String END_OF_URL = ":8080/events";
+    private static final String END_OF_URL = "/events";
     private final String ip;
     private final int port;
+    private final Logger logger;
 
-    public Client(String ip, int port) {
+    public Client(String ip, int port, Logger logger) {
         this.ip = ip;
         this.port = port;
+        this.logger = logger;
     }
 
 
     EventsResponse sendEvents(Events events) {
+
+        HttpURLConnection connection;
         try {
-            URL url = new URL(ip + END_OF_URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            URL url = new URL(ip + ':' + port + END_OF_URL);
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
+        } catch (IOException e) {
+            logger.error("can't create url or open connection", e);
+            return null;
+        }
 
-            try (OutputStream outputStream = connection.getOutputStream()) {
-                JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                gson.toJson(events, Events.class, jsonWriter);
-                jsonWriter.flush();
-            } catch (IOException e) {
-                return null;
-            }
+        try (OutputStream outputStream = connection.getOutputStream()) {
+            JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(events, Events.class, jsonWriter);
+            jsonWriter.flush();
+        } catch (IOException e) {
+            logger.error("can't send request", e);
+            return null;
+        }
 
-            System.out.println(connection.getResponseCode());
+        try (Reader reader = new InputStreamReader(connection.getInputStream())) {
+            logger.debug("response code: " + connection.getResponseCode());
+            EventsResponse eventsResponse = new Gson().fromJson(reader, EventsResponse.class);
+            logger.debug("response: " + new Gson().toJson(eventsResponse));
 
-            try (Reader reader = new InputStreamReader(connection.getInputStream())) {
-                EventsResponse eventsResponse = new Gson().fromJson(reader, EventsResponse.class);
-                System.out.println("response: " + new Gson().toJson(eventsResponse));
+            return eventsResponse;
 
-                return eventsResponse;
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        } catch (IOException | NullPointerException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error("can't parse response", e);
             return null;
         }
     }

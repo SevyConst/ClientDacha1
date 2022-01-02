@@ -1,5 +1,7 @@
 package com.company;
 
+import org.slf4j.Logger;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +20,7 @@ public class ForProperties {
     private String urlForSql;
     private String isRpi;
 
-    boolean load(String arg) {
+    boolean load(String arg, Logger logger) {
         Properties prop = new Properties();
 
         String path = arg.substring(ARG_START.length());
@@ -28,21 +30,24 @@ public class ForProperties {
 
             ip = prop.getProperty(PROPERTY_IP_SERVER_1);
             if (null == ip) {
+                logger.error("null == ip");
                 return false;
             }
-            System.out.println("IP Digital Ocean = " + ip);
+            logger.info("IP Digital Ocean = " + ip);
 
             try {
                 port = Integer.parseInt(prop.getProperty(PROPERTY_PORT_DO_SERVER_1));
             } catch (NumberFormatException e) {
+                logger.error("can't parse properties: can't read port", e);
                 return false;
             }
-            System.out.println("Port Digital Ocean " + port);
+            logger.info("Port Digital Ocean " + port);
 
             urlForSql = prop.getProperty(PROPERTY_URL_FOR_SQL);
-            System.out.println("Url for SQL lite" + urlForSql);
+            logger.info("Url for SQL lite" + urlForSql);
 
-        } catch(IOException ex){
+        } catch(IOException e){
+            logger.error("can't read properties", e);
             return false;
         }
 

@@ -3,6 +3,7 @@ package com.company;
 import com.company.models.Event;
 import com.company.models.Events;
 import com.company.models.EventsResponse;
+import org.slf4j.Logger;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
@@ -11,15 +12,17 @@ public class Controller {
 
     private final Sqlite sqlite;
     private final Client client;
+    private final Logger logger;
 
-    public Controller(Sqlite sqlite, Client client) {
+    public Controller(Sqlite sqlite, Client client, Logger logger) {
         this.sqlite = sqlite;
         this.client = client;
+        this.logger = logger;
     }
 
     private int periodSentSec = 10;
 
-    void work() {
+    void launch() {
 
         sqlite.insertStart(fillEvent());
         updateAndSend();
@@ -28,6 +31,7 @@ public class Controller {
             try {
                 TimeUnit.SECONDS.sleep(periodSentSec);
             } catch (InterruptedException e) {
+
                 break;
             }
             sqlite.insertPing(fillEvent());
