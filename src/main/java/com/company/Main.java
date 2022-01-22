@@ -20,11 +20,13 @@ public class Main {
         }
 
 
-        Sqlite sqlite = new Sqlite(forProperties.getUrlForSql(), logger);
-        Client client = new Client(
+        Db db = new Db(forProperties.getUrlForDb(), logger);
+        httpClient httpClient = new httpClient(
                 forProperties.getIp(), forProperties.getPort(), logger);
 
-        Controller controller = new Controller(sqlite, client, logger);
+        Controller controller = new Controller(db, httpClient,
+                forProperties.getDeviceId(), forProperties.getPeriod(),
+                logger);
         controller.launch();
 
         System.out.println("Done!");

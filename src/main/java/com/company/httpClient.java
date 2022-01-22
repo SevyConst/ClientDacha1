@@ -1,7 +1,7 @@
 package com.company;
 
-import com.company.models.Events;
-import com.company.models.EventsResponse;
+import com.company.data.Events;
+import com.company.data.EventsResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
@@ -13,14 +13,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 
-public class Client {
+public class httpClient {
 
-    private static final String END_OF_URL = "/events";
+    private static final String END_OF_URL = "/event";
     private final String ip;
     private final int port;
     private final Logger logger;
 
-    public Client(String ip, int port, Logger logger) {
+    public httpClient(String ip, int port, Logger logger) {
         this.ip = ip;
         this.port = port;
         this.logger = logger;

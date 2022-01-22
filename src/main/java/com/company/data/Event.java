@@ -1,4 +1,4 @@
-package com.company.models;
+package com.company.data;
 
 public class Event {
     private Long id;

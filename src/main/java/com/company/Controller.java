@@ -1,8 +1,7 @@
 package com.company;
 
-import com.company.models.Event;
-import com.company.models.Events;
-import com.company.models.EventsResponse;
+import com.company.data.Events;
+import com.company.data.EventsResponse;
 import org.slf4j.Logger;
 
 import java.time.Instant;
@@ -10,53 +9,51 @@ import java.util.concurrent.TimeUnit;
 
 public class Controller {
 
-    private final Sqlite sqlite;
-    private final Client client;
+    private final Db db;
+    private final httpClient httpClient;
+    private final int deviceId;
     private final Logger logger;
 
-    public Controller(Sqlite sqlite, Client client, Logger logger) {
-        this.sqlite = sqlite;
-        this.client = client;
+    private int period;
+
+    public Controller(Db db, httpClient httpClient,
+                      int deviceId, int period,
+                      Logger logger) {
+        this.db = db;
+        this.httpClient = httpClient;
+        this.deviceId = deviceId;
+        this.period = period;
         this.logger = logger;
     }
 
-    private int periodSentSec = 10;
-
     void launch() {
-
-        sqlite.insertStart(fillEvent());
+        db.insertEvent("start", Instant.now().toEpochMilli());
         updateAndSend();
-        while (true) {
 
+        while (true) {
             try {
-                TimeUnit.SECONDS.sleep(periodSentSec);
+                TimeUnit.SECONDS.sleep(period);
             } catch (InterruptedException e) {
 
                 break;
             }
-            sqlite.insertPing(fillEvent());
+
+            db.insertEvent("ping", Instant.now().toEpochMilli());
             updateAndSend();
-
         }
-
     }
 
     void updateAndSend() {
-        Events events = sqlite.selectNotApproved();
-        EventsResponse eventsResponse = client.sendEvents(events);
+        Events events = db.selectNotApproved();
+        events.setDeviceId(deviceId);
+        EventsResponse eventsResponse = httpClient.sendEvents(events);
         if (null != eventsResponse && null != eventsResponse.getEventsIdsDelivered()) {
-            sqlite.updateSentBool(events);
-            sqlite.updateSentApprovedBool(eventsResponse.getEventsIdsDelivered());
+            db.updateSentBool(events);
+            db.updateSentApprovedBool(eventsResponse.getEventsIdsDelivered());
 
             if(null != eventsResponse.getPeriodSent()) {
-                periodSentSec = eventsResponse.getPeriodSent();
+                period = eventsResponse.getPeriodSent();
             }
         }
-    }
-
-    private Event fillEvent() {
-        Event event = new Event();
-        event.setTimeEvent(Instant.now().toEpochMilli());
-        return event;
     }
 }

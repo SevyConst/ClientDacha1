@@ -1,7 +1,7 @@
 package com.company;
 
-import com.company.models.Event;
-import com.company.models.Events;
+import com.company.data.Event;
+import com.company.data.Events;
 import org.slf4j.Logger;
 
 import java.sql.*;
@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Sqlite {
+public class Db {
     private final String url;
     private final Logger logger;
 
@@ -30,17 +30,18 @@ public class Sqlite {
     private static final String trueStr = "Y";
     private static final String falseStr = "N";
 
-    Sqlite(String url, Logger logger) {
+    Db(String url, Logger logger) {
         this.url = url;
         this.logger = logger;
     }
 
-    private static final String SQL_INSERT_START = "INSERT INTO events (name_event, time_event) VALUES('start', ?)";
-    void insertStart(Event event) {
+    private static final String SQL_INSERT_EVENT = "INSERT INTO events (name_event, time_event) VALUES(?, ?)";
+    void insertEvent(String nameEvent, long time) {
         try (Connection connection = DriverManager.getConnection(url);
-             PreparedStatement statement = connection.prepareStatement(SQL_INSERT_START)) {
+             PreparedStatement statement = connection.prepareStatement(SQL_INSERT_EVENT)) {
 
-            statement.setLong(1, event.getTimeEvent());
+            statement.setString(1, nameEvent);
+            statement.setLong(2, time);
             statement.executeUpdate();
 
         } catch (SQLException e) {
@@ -48,7 +49,8 @@ public class Sqlite {
         }
     }
 
-    private static final String SQL_SELECT_NOT_APPROVED = "SELECT * FROM events WHERE sent_approved <> 'Y'";
+    private static final String SQL_SELECT_NOT_APPROVED =
+            "SELECT * FROM events WHERE sent_approved <> 'Y' ORDER BY time_event";
     Events selectNotApproved() {
         Events events = new Events();
         try (Connection connection = DriverManager.getConnection(url);
@@ -118,22 +120,6 @@ public class Sqlite {
 
         } catch (SQLException e) {
             logger.error("can't update info about approval (sqlite)", e);
-
-        }
-    }
-
-    private static final String SQL_INSERT_PING = "INSERT INTO events (name_event, time_event) VALUES('event', ?)";
-    void insertPing(Event event) {
-        try (Connection connection = DriverManager.getConnection(url);
-             PreparedStatement statement = connection.prepareStatement(SQL_INSERT_PING)) {
-
-            statement.setLong(1, event.getTimeEvent());
-            statement.executeUpdate();
-
-        } catch (SQLException e) {
-            logger.error("can't insert info about ping (sqlite)", e);
         }
     }
 }
-
-
