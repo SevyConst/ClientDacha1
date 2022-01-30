@@ -39,7 +39,7 @@ public class ForProperties {
 
             // 3. Db
             urlForDb = prop.getProperty(PROPERTY_URL_FOR_SQL);
-            logger.info("Url for SQL lite" + urlForDb);
+            logger.info("Url for SQlite" + urlForDb);
 
             // 4. Is this client working on Raspberry Pi
             Boolean isRpi = readIsRpi(prop.getProperty(PROPERTY_IS_RASPBERRY_PI), logger);
@@ -64,7 +64,7 @@ public class ForProperties {
                 logger.error("can't parse properties: can't read period sending data", e);
                 return false;
             }
-            logger.info("Period sending data: " + deviceId + "seconds");
+            logger.info("Period sending data: " + period + "seconds");
 
         } catch(IOException e){
             logger.error("can't read properties", e);
