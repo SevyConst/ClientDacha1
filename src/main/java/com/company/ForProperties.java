@@ -39,7 +39,7 @@ public class ForProperties {
 
             // 3. Db
             urlForDb = prop.getProperty(PROPERTY_URL_FOR_SQL);
-            logger.info("Url for SQlite" + urlForDb);
+            logger.info("Url for SQlite: " + urlForDb);
 
             // 4. Is this client working on Raspberry Pi
             Boolean isRpi = readIsRpi(prop.getProperty(PROPERTY_IS_RASPBERRY_PI), logger);
@@ -81,7 +81,7 @@ public class ForProperties {
             logger.error("null == ip");
             return false;
         }
-        logger.info("IP Digital Ocean = " + ip);
+        logger.info("IP Digital Ocean: " + ip);
 
         // port
         try {
@@ -90,7 +90,7 @@ public class ForProperties {
             logger.error("can't parse properties: can't read port", e);
             return false;
         }
-        logger.info("Port Digital Ocean " + port);
+        logger.info("Port Digital Ocean: " + port);
 
         return true;
     }

@@ -1,17 +1,15 @@
-package com.company.data;
+package com.company.models;
 
-public class Event {
+public class ModelEvent {
     private Long id;
     private String nameEvent;
-    private Long timeEvent;
+    private String timeEvent;
     private int temperature;
     private int processor;
     private int usedMemory;
     private int freeMemory;
     private boolean sent;
-    private long sentTime;
-    private boolean sentApproved;
-    private long sentApprovedTime;
+    private String sentTime;
     private String additInfo;
 
 
@@ -31,11 +29,11 @@ public class Event {
         this.nameEvent = nameEvent;
     }
 
-    public long getTimeEvent() {
+    public String getTimeEvent() {
         return timeEvent;
     }
 
-    public void setTimeEvent(long timeEvent) {
+    public void setTimeEvent(String timeEvent) {
         this.timeEvent = timeEvent;
     }
 
@@ -79,28 +77,12 @@ public class Event {
         this.sent = sent;
     }
 
-    public long getSentTime() {
+    public String getSentTime() {
         return sentTime;
     }
 
-    public void setSentTime(long sentTime) {
+    public void setSentTime(String sentTime) {
         this.sentTime = sentTime;
-    }
-
-    public boolean isSentApproved() {
-        return sentApproved;
-    }
-
-    public void setSentApproved(boolean sentApproved) {
-        this.sentApproved = sentApproved;
-    }
-
-    public long getSentApprovedTime() {
-        return sentApprovedTime;
-    }
-
-    public void setSentApprovedTime(long sentApprovedTime) {
-        this.sentApprovedTime = sentApprovedTime;
     }
 
     public String getAdditInfo() {

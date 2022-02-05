@@ -1,11 +1,11 @@
 package com.company;
 
-import com.company.data.Event;
-import com.company.data.Events;
+import com.company.dao.DaoEvent;
 import org.slf4j.Logger;
 
 import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,32 +51,32 @@ public class Db {
 
     private static final String SQL_SELECT_NOT_APPROVED =
             "SELECT * FROM events WHERE sent_approved <> 'Y' ORDER BY time_event";
-    Events selectNotApproved() {
-        Events events = new Events();
+    List<DaoEvent> selectNotApproved() {
+        List<DaoEvent> result = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(url);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(SQL_SELECT_NOT_APPROVED)) {
 
             while (resultSet.next()) {
-                Event event = new Event();
+                DaoEvent daoEvent = new DaoEvent();
 
-                event.setId(resultSet.getLong(COLUMN_ID));
-                event.setNameEvent(resultSet.getString(COLUMN_NAME_EVENT));
-                event.setTimeEvent(resultSet.getLong(COLUMN_TIME_EVENT));
-                event.setSent(trueStr.equals(resultSet.getString(COLUMN_SENT)));
-                event.setTemperature(resultSet.getInt(COLUMN_TEMPERATURE));
-                event.setProcessor(resultSet.getInt(COLUMN_PROCESSOR));
-                event.setUsedMemory(resultSet.getInt(COLUMN_USED_MEMORY));
-                event.setFreeMemory(resultSet.getInt(COLUMN_FREE_MEMORY));
-                event.setSentTime(resultSet.getLong(COLUMN_SENT_TIME));
-                event.setSentApproved(trueStr.equals(resultSet.getString(COLUMN_SENT_APPROVED)));
-                event.setSentApprovedTime(resultSet.getLong(COLUMN_SEN_APPROVED_TIME));
-                event.setAdditInfo(resultSet.getString(COLUMN_ADDIT_INFO));
+                daoEvent.setId(resultSet.getLong(COLUMN_ID));
+                daoEvent.setNameEvent(resultSet.getString(COLUMN_NAME_EVENT));
+                daoEvent.setTimeEvent(resultSet.getLong(COLUMN_TIME_EVENT));
+                daoEvent.setSent(trueStr.equals(resultSet.getString(COLUMN_SENT)));
+                daoEvent.setTemperature(resultSet.getInt(COLUMN_TEMPERATURE));
+                daoEvent.setProcessor(resultSet.getInt(COLUMN_PROCESSOR));
+                daoEvent.setUsedMemory(resultSet.getInt(COLUMN_USED_MEMORY));
+                daoEvent.setFreeMemory(resultSet.getInt(COLUMN_FREE_MEMORY));
+                daoEvent.setSentTime(resultSet.getLong(COLUMN_SENT_TIME));
+                daoEvent.setSentApproved(trueStr.equals(resultSet.getString(COLUMN_SENT_APPROVED)));
+                daoEvent.setSentApprovedTime(resultSet.getLong(COLUMN_SEN_APPROVED_TIME));
+                daoEvent.setAdditInfo(resultSet.getString(COLUMN_ADDIT_INFO));
 
-                events.getEvents().add(event);
+                result.add(daoEvent);
             }
 
-            return events;
+            return result;
 
         } catch (SQLException e) {
             logger.error("can't select from sqlite", e);
@@ -84,10 +84,10 @@ public class Db {
         }
     }
 
-    void updateSentBool(Events events) {
+    void updateSentBool(List<DaoEvent> events) {
 
         StringBuilder sqlUpdate = new StringBuilder("UPDATE events SET sent = 'Y', sent_time = ? WHERE id in (");
-        sqlUpdate.append(events.getEvents().stream().
+        sqlUpdate.append(events.stream().
                 map(event -> String.valueOf(event.getId())).
                 collect(Collectors.joining(", ")));
         sqlUpdate.append(");");
