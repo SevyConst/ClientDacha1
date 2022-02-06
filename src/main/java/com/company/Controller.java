@@ -2,15 +2,14 @@ package com.company;
 
 import com.company.dao.DaoEvent;
 import com.company.dao.EventsResponse;
-import com.company.models.ModelEvent;
-import com.company.models.ModelEvents;
+import com.company.models.Event;
+import com.company.models.Events;
 import org.slf4j.Logger;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -54,10 +53,10 @@ public class Controller {
 
     private void updateAndSend() {
         List<DaoEvent> daoEvents = db.selectNotApproved();
-        ModelEvents modelEvents = daoEvents2ModelEvents(daoEvents);
-        modelEvents.setDeviceId(deviceId);
+        Events events = daoEvents2ModelEvents(daoEvents);
+        events.setDeviceId(deviceId);
 
-        EventsResponse eventsResponse = httpClient.sendEvents(modelEvents);
+        EventsResponse eventsResponse = httpClient.sendEvents(events);
         db.updateSentBool(daoEvents);
         if (null != eventsResponse && null != eventsResponse.getEventsIdsDelivered()) {
             db.updateSentApprovedBool(eventsResponse.getEventsIdsDelivered());
@@ -68,31 +67,31 @@ public class Controller {
         }
     }
 
-    private ModelEvents daoEvents2ModelEvents(List<DaoEvent> daoEvents) {
-        ModelEvents result = new ModelEvents();
+    private Events daoEvents2ModelEvents(List<DaoEvent> daoEvents) {
+        Events result = new Events();
         for (DaoEvent daoEvent: daoEvents) {
-            ModelEvent modelEvent = new ModelEvent();
+            Event event = new Event();
 
-            modelEvent.setId(daoEvent.getId());
-            modelEvent.setNameEvent(daoEvent.getNameEvent());
+            event.setId(daoEvent.getId());
+            event.setNameEvent(daoEvent.getNameEvent());
 
-            modelEvent.setTimeEvent(
+            event.setTimeEvent(
                     dateFromMillis2String(
                             daoEvent.getTimeEvent()));
 
-            modelEvent.setTemperature(daoEvent.getTemperature());
-            modelEvent.setProcessor(daoEvent.getProcessor());
-            modelEvent.setUsedMemory(daoEvent.getUsedMemory());
-            modelEvent.setFreeMemory(daoEvent.getFreeMemory());
-            modelEvent.setSent(daoEvent.isSent());
+            event.setTemperature(daoEvent.getTemperature());
+            event.setProcessor(daoEvent.getProcessor());
+            event.setUsedMemory(daoEvent.getUsedMemory());
+            event.setFreeMemory(daoEvent.getFreeMemory());
+            event.setSent(daoEvent.isSent());
 
-            modelEvent.setSentTime(
+            event.setSentTime(
                     dateFromMillis2String(
                             daoEvent.getSentTime()));
 
-            modelEvent.setAdditInfo(daoEvent.getAdditInfo());
+            event.setAdditInfo(daoEvent.getAdditInfo());
 
-            result.getEvents().add(modelEvent);
+            result.getEvents().add(event);
         }
 
         return result;

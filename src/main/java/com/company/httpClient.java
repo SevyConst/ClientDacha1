@@ -1,7 +1,7 @@
 package com.company;
 
 import com.company.dao.EventsResponse;
-import com.company.models.ModelEvents;
+import com.company.models.Events;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
@@ -27,7 +27,7 @@ public class httpClient {
     }
 
 
-    EventsResponse sendEvents(ModelEvents modelEvents) {
+    EventsResponse sendEvents(Events events) {
 
         HttpURLConnection connection;
         try {
@@ -44,7 +44,7 @@ public class httpClient {
         try (OutputStream outputStream = connection.getOutputStream()) {
             JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(modelEvents, ModelEvents.class, jsonWriter);
+            gson.toJson(events, Events.class, jsonWriter);
             jsonWriter.flush();
         } catch (IOException e) {
             logger.error("can't send request", e);

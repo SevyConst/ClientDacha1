@@ -1,6 +1,6 @@
 package com.company.models;
 
-public class ModelEvent {
+public class Event {
     private Long id;
     private String nameEvent;
     private String timeEvent;
