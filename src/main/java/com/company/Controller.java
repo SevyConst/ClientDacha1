@@ -6,13 +6,9 @@ import com.company.models.Event;
 import com.company.models.Events;
 import org.slf4j.Logger;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 public class Controller {
@@ -23,6 +19,9 @@ public class Controller {
     private final Logger logger;
 
     private int period;
+
+    public static DateTimeFormatter DateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
 
     public Controller(Db db, httpClient httpClient,
                       int deviceId, int period,
@@ -35,7 +34,9 @@ public class Controller {
     }
 
     void launch() {
-        db.insertEvent("start", Instant.now().toEpochMilli());
+        LocalDateTime dateTime = LocalDateTime.now();
+        String nowStr = dateTime.format(DateFormatter);
+        db.insertEvent("start", nowStr);
         updateAndSend();
 
         while (true) {
@@ -46,7 +47,9 @@ public class Controller {
                 break;
             }
 
-            db.insertEvent("ping", Instant.now().toEpochMilli());
+            dateTime = LocalDateTime.now();
+            nowStr = dateTime.format(DateFormatter);
+            db.insertEvent("ping", nowStr);
             updateAndSend();
         }
     }
@@ -61,7 +64,7 @@ public class Controller {
         if (null != eventsResponse && null != eventsResponse.getEventsIdsDelivered()) {
             db.updateSentApprovedBool(eventsResponse.getEventsIdsDelivered());
 
-            if(null != eventsResponse.getPeriodSent()) {
+            if (null != eventsResponse.getPeriodSent()) {
                 period = eventsResponse.getPeriodSent();
             }
         }
@@ -74,33 +77,17 @@ public class Controller {
 
             event.setId(daoEvent.getId());
             event.setNameEvent(daoEvent.getNameEvent());
-
-            event.setTimeEvent(
-                    dateFromMillis2String(
-                            daoEvent.getTimeEvent()));
-
+            event.setTimeEvent(daoEvent.getTimeEvent());
             event.setTemperature(daoEvent.getTemperature());
             event.setProcessor(daoEvent.getProcessor());
             event.setUsedMemory(daoEvent.getUsedMemory());
             event.setFreeMemory(daoEvent.getFreeMemory());
             event.setSent(daoEvent.isSent());
-
-            event.setSentTime(
-                    dateFromMillis2String(
-                            daoEvent.getSentTime()));
-
+            event.setSentTime(daoEvent.getSentTime());
             event.setAdditInfo(daoEvent.getAdditInfo());
-
             result.getEvents().add(event);
         }
 
         return result;
-    }
-
-    private String dateFromMillis2String(Long epochTime) {
-        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS Z");
-        format.setTimeZone(TimeZone.getTimeZone(ZoneId.of("Europe/Moscow")));
-        Date date = new Date(epochTime);
-        return format.format(date);
     }
 }
