@@ -85,7 +85,6 @@ public class Db {
     }
 
     void updateSentBool(List<DaoEvent> events) {
-
         StringBuilder sqlUpdate = new StringBuilder("UPDATE events SET sent = 'Y', sent_time = ? WHERE id in (");
         sqlUpdate.append(events.stream().
                 map(event -> String.valueOf(event.getId())).
@@ -106,7 +105,6 @@ public class Db {
     }
 
     void updateSentApprovedBool(List<Long> ids) {
-
         StringBuilder sqlUpdate =
                 new StringBuilder("UPDATE events SET sent_approved = 'Y', sent_approved_time = ? WHERE id in (");
 
@@ -125,6 +123,56 @@ public class Db {
 
         } catch (SQLException e) {
             logger.error("can't update info about approval (sqlite)", e);
+        }
+    }
+
+    private final static String SQL_COUNT_ROW = "SELECT COUNT(*) AS count FROM events";
+    long countRow() {
+        try (Connection connection = DriverManager.getConnection(url);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(SQL_COUNT_ROW)) {
+
+            if (resultSet.next()) {
+                return resultSet.getInt("count");
+            } else {
+                return -1;
+            }
+
+        } catch (SQLException e) {
+            logger.error("can't select counting from sqlite", e);
+            return -1;
+        }
+    }
+
+    private final static String SQL_MIN = "SELECT min(id) FROM events";
+    long getMinId() {
+        try (Connection connection = DriverManager.getConnection(url);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(SQL_MIN)) {
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            } else {
+                return -1;
+            }
+
+        } catch (SQLException e) {
+            logger.error("can't select counting from sqlite", e);
+            return -1;
+        }
+    }
+
+    private static final String SQL_REMOVE_ROWS = "DELETE FROM events WHERE id < ?";
+    void removeRows(long n) {
+
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement statement = connection.prepareStatement(SQL_REMOVE_ROWS)) {
+
+            statement.setLong(1, n);
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            logger.error("CAN'T REMOVE ROWS!", e);
         }
     }
 }

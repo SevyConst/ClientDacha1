@@ -12,17 +12,26 @@ public class ForProperties {
 
     private static final String PROPERTY_IP_SERVER_1 = "ip_server_1";
     private static final String PROPERTY_PORT_DO_SERVER_1 = "port_server_1";
-    private static final String PROPERTY_URL_FOR_SQL = "url_for_sql";
+    private static final String PROPERTY_URL_DB = "url_db";
     private static final String PROPERTY_IS_RASPBERRY_PI = "is_raspberry_pi";
     private static final String PROPERTY_DEVICE_ID = "device_id";
     private static final String PROPERTY_PERIOD_SEC = "period";
+    private static final String PROPERTY_MAX_ROWS_DB = "max_rows";
+    private static final String PROPERTY_SLEEP_REMOVING = "sleep_removing";
 
     private String ip;
     private int port;
-    private String urlForDb;
+    private String urlDb;
     private Boolean isRpi;  // Is this client working on Raspberry Pi
     private int deviceId;
     private int period;  // Period sending data (in seconds)
+
+    private long maxRows;  // For removing
+    private static final long DEFAULT_MAX_ROWS = 60*60*24*90;  // 90 days
+
+    private long sleepRemoving;  // In seconds
+    private static final int DEFAULT_SLEEP_REMOVING = 60*60*24;
+
 
     boolean load(String arg, Logger logger) {
         Properties prop = new Properties();
@@ -32,16 +41,15 @@ public class ForProperties {
         try(InputStream inputStream = new FileInputStream(path))  {
             prop.load(inputStream);
 
-            // 1-2. Server Ip and port
             if (!readServerParams(prop, logger)) {
                 return false;
             }
 
-            // 3. Db
-            urlForDb = prop.getProperty(PROPERTY_URL_FOR_SQL);
-            logger.info("Url for SQlite: " + urlForDb);
+            if (!readParamsForDb(prop, logger)) {
+                return false;
+            }
 
-            // 4. Is this client working on Raspberry Pi
+            // Is this client working on Raspberry Pi
             Boolean isRpi = readIsRpi(prop.getProperty(PROPERTY_IS_RASPBERRY_PI), logger);
             if (null == isRpi) {
                 return false;
@@ -64,7 +72,7 @@ public class ForProperties {
                 logger.error("can't parse properties: can't read period sending data", e);
                 return false;
             }
-            logger.info("Period sending data: " + period + "seconds");
+            logger.info("Period sending data: " + period + " seconds");
 
         } catch(IOException e){
             logger.error("can't read properties", e);
@@ -75,13 +83,14 @@ public class ForProperties {
     }
 
     private boolean readServerParams(Properties prop, Logger logger) {
+
         // ip
         ip = prop.getProperty(PROPERTY_IP_SERVER_1);
         if (null == ip) {
             logger.error("null == ip");
             return false;
         }
-        logger.info("IP Digital Ocean: " + ip);
+        logger.info("Server IP: " + ip);
 
         // port
         try {
@@ -90,7 +99,37 @@ public class ForProperties {
             logger.error("can't parse properties: can't read port", e);
             return false;
         }
-        logger.info("Port Digital Ocean: " + port);
+        logger.info("Server Port: " + port);
+
+        return true;
+    }
+
+    private boolean readParamsForDb(Properties prop, Logger logger) {
+
+        urlDb = prop.getProperty(PROPERTY_URL_DB);
+        if (null == urlDb) {
+            logger.error("can't parse url for Db");
+            return false;
+        }
+        logger.info("Url for SQlite: " + urlDb);
+
+        try {
+            maxRows = Long.parseLong(prop.getProperty(PROPERTY_MAX_ROWS_DB));
+        } catch (NumberFormatException e) {
+            logger.warn("can't parse properties: can't read max rows. Using default value: "
+                    + DEFAULT_MAX_ROWS + " rows", e);
+            maxRows = DEFAULT_MAX_ROWS;
+        }
+        logger.info("max rows: " + maxRows);
+
+        try {
+            sleepRemoving = Long.parseLong(prop.getProperty(PROPERTY_SLEEP_REMOVING));
+        } catch (NumberFormatException e) {
+            logger.warn(
+                    "can't parse properties: can't read sleep removing. Using default value: " +
+                            DEFAULT_SLEEP_REMOVING + " seconds", e);
+            sleepRemoving = DEFAULT_SLEEP_REMOVING;
+        }
 
         return true;
     }
@@ -121,8 +160,16 @@ public class ForProperties {
         return port;
     }
 
-    public String getUrlForDb() {
-        return urlForDb;
+    public String getUrlDb() {
+        return urlDb;
+    }
+
+    public long getMaxRows() {
+        return maxRows;
+    }
+
+    public long getSleepRemoving() {
+        return sleepRemoving;
     }
 
     public boolean getIsRpi() {

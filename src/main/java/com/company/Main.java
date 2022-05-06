@@ -3,13 +3,12 @@ package com.company;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class Main {
     public static void main(String[] args) {
         Logger logger = LoggerFactory.getLogger(Main.class);
 
         if (!isCorrectArgs(args)) {
-            logger.error("main method: wrong input arguments");
+            logger.error("Wrong input arguments");
             return;
         }
 
@@ -18,8 +17,13 @@ public class Main {
             return;
         }
 
+        Db db = new Db(forProperties.getUrlDb(), logger);
+        new LimitingSizeDb(
+                forProperties.getMaxRows(),
+                db,
+                forProperties.getSleepRemoving(),
+                logger);
 
-        Db db = new Db(forProperties.getUrlForDb(), logger);
         httpClient httpClient = new httpClient(
                 forProperties.getIp(), forProperties.getPort(), logger);
 
@@ -27,8 +31,6 @@ public class Main {
                 forProperties.getDeviceId(), forProperties.getPeriod(),
                 logger);
         controller.launch();
-
-        System.out.println("Done!");
     }
 
     private static boolean isCorrectArgs(String[] args) {
