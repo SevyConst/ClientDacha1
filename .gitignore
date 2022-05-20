@@ -6,3 +6,5 @@ target/
 *.sql
 *.db
 *.properties
+for prod/
+for local/
