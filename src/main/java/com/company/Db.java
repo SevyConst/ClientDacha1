@@ -163,7 +163,7 @@ public class Db {
     }
 
     private static final String SQL_REMOVE_ROWS = "DELETE FROM events WHERE id < ?";
-    void removeRows(long n) {
+    boolean removeRows(long n) {
 
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(SQL_REMOVE_ROWS)) {
@@ -173,6 +173,9 @@ public class Db {
 
         } catch (SQLException e) {
             logger.error("CAN'T REMOVE ROWS!", e);
+            return false;
         }
+
+        return true;
     }
 }

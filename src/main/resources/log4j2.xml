@@ -1,15 +1,37 @@
-<Configuration status="trace">
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n</Property>
+    </Properties>
     <Appenders>
-        <!-- Console appender configuration -->
-        <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout
-                    pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}" />
         </Console>
+
+        <RollingFile name="appLog"
+                     fileName="logs/application.log"
+                     filePattern="logs/application-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+
+            <DefaultRolloverStrategy>
+                <Delete basePath="./logs/" maxDepth="1">
+                    <IfAny>
+                        <IfLastModified age="90d" />
+                        <IfAccumulatedFileCount exceeds="11" />
+                    </IfAny>
+                </Delete>
+            </DefaultRolloverStrategy>
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1MB" />
+            </Policies>
+        </RollingFile>
+
     </Appenders>
     <Loggers>
-        <!-- Root logger referring to console appender -->
-        <Root level="info" additivity="false">
-            <AppenderRef ref="console" />
+        <Root level="info">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="appLog" />
         </Root>
     </Loggers>
 </Configuration>

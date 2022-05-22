@@ -25,15 +25,20 @@ public class LimitingSizeDb implements Runnable {
     public void run() {
         while (true) {
 
-            logger.info("Start clearing db");
+            boolean isRemoved = false;  // is rows removed successfully
 
             long nRows = db.countRow();
+            logger.info("rows: " + nRows);
             if (nRows > maxRows) {
-                long nRowsToRemove = nRows - maxRows;
-                db.removeRows(db.getMinId() + nRowsToRemove);
-            }
+                logger.info("Start clearing db");
 
-            logger.info("clearing db is finished");
+                long nRowsToRemove = nRows - maxRows;
+                isRemoved = db.removeRows(db.getMinId() + nRowsToRemove);
+
+                if (isRemoved) {
+                    logger.info("clearing db is finished");
+                }
+            }
 
             try {
                 TimeUnit.SECONDS.sleep(sleepSeconds);
