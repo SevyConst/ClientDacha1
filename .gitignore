@@ -8,3 +8,4 @@ target/
 *.properties
 for prod/
 for local/
+logs/
