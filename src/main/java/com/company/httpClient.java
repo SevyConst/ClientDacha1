@@ -30,7 +30,10 @@ public class httpClient {
     EventsResponse sendEvents(Events events) {
 
         HttpURLConnection connection;
+        logger.debug("start sending");
+        long startTime = System.nanoTime();
         try {
+            logger.debug("init connection");
             URL url = new URL(ip + ':' + port + END_OF_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("Content-Type", "application/json");
@@ -41,21 +44,26 @@ public class httpClient {
             return null;
         }
 
+        logger.debug("create outputStream");
         try (OutputStream outputStream = connection.getOutputStream()) {
             JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             gson.toJson(events, Events.class, jsonWriter);
             jsonWriter.flush();
+            logger.debug("flushed!");
         } catch (IOException e) {
             logger.error("can't send request", e);
             return null;
         }
 
+        logger.debug("create reader!");
         try (Reader reader = new InputStreamReader(connection.getInputStream())) {
-            logger.debug("response code: " + connection.getResponseCode());
+            logger.info("response code: " + connection.getResponseCode());
             EventsResponse eventsResponse = new Gson().fromJson(reader, EventsResponse.class);
-            logger.debug("response: " + new Gson().toJson(eventsResponse));
+            logger.info("response: " + new Gson().toJson(eventsResponse));
 
+            long endTime = System.nanoTime();
+            logger.info("Execution time: " + (endTime - startTime)/Math.pow(10, 9) + " milliseconds");
             return eventsResponse;
 
         } catch (IOException e) {

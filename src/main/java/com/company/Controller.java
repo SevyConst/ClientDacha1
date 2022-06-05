@@ -36,6 +36,7 @@ public class Controller {
     void launch() {
         LocalDateTime dateTime = LocalDateTime.now();
         String nowStr = dateTime.format(DateFormatter);
+        logger.debug("insert start event");
         db.insertEvent("start", nowStr);
         updateAndSend();
 
@@ -43,12 +44,13 @@ public class Controller {
             try {
                 TimeUnit.SECONDS.sleep(period);
             } catch (InterruptedException e) {
-
+                logger.error("break main circle", e);
                 break;
             }
 
             dateTime = LocalDateTime.now();
             nowStr = dateTime.format(DateFormatter);
+            logger.debug("insert ping event");
             db.insertEvent("ping", nowStr);
             updateAndSend();
         }
