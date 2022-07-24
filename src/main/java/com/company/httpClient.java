@@ -11,6 +11,8 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 
 public class httpClient {
@@ -31,7 +33,7 @@ public class httpClient {
 
         HttpURLConnection connection;
         logger.debug("start sending");
-        long startTime = System.nanoTime();
+        LocalDateTime startTime = LocalDateTime.now();
         try {
             logger.debug("init connection");
             URL url = new URL(ip + ':' + port + END_OF_URL);
@@ -44,13 +46,13 @@ public class httpClient {
             return null;
         }
 
-        logger.debug("create outputStream");
         try (OutputStream outputStream = connection.getOutputStream()) {
             JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             gson.toJson(events, Events.class, jsonWriter);
             jsonWriter.flush();
-            logger.debug("flushed!");
+
+            logger.info(gson.toJson(events, Events.class));
         } catch (IOException e) {
             logger.error("can't send request", e);
             return null;
@@ -62,8 +64,8 @@ public class httpClient {
             EventsResponse eventsResponse = new Gson().fromJson(reader, EventsResponse.class);
             logger.info("response: " + new Gson().toJson(eventsResponse));
 
-            long endTime = System.nanoTime();
-            logger.info("Execution time: " + (endTime - startTime)/Math.pow(10, 9) + " milliseconds");
+            LocalDateTime endTime = LocalDateTime.now();
+            logger.info("Execution time: " + ChronoUnit.MILLIS.between(startTime, endTime) + " milliseconds");
             return eventsResponse;
 
         } catch (IOException e) {
