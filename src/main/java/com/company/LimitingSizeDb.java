@@ -25,7 +25,7 @@ public class LimitingSizeDb implements Runnable {
     public void run() {
         while (true) {
 
-            boolean isRemoved = false;  // is rows removed successfully
+            boolean isRemoved = false;  // Variable indicates are rows removed successfully
 
             long nRows = db.countRow();
             logger.info("rows: " + nRows);

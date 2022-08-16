@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class ForProperties {
-    public static final String ARG_START = "-pathConfig=";
+    public static final String ARG_START = "--pathConfig=";
 
     private static final String PROPERTY_IP_SERVER_1 = "ip_server_1";
     private static final String PROPERTY_PORT_DO_SERVER_1 = "port_server_1";
