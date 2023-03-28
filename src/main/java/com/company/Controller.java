@@ -20,8 +20,7 @@ public class Controller {
 
     private int period;
 
-    public static DateTimeFormatter DateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-
+    public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public Controller(Db db, httpClient httpClient,
                       int deviceId, int period,
@@ -35,7 +34,7 @@ public class Controller {
 
     void launch() {
         LocalDateTime dateTime = LocalDateTime.now();
-        String nowStr = dateTime.format(DateFormatter);
+        String nowStr = dateTime.format(dateTimeFormatter);
         logger.debug("insert start event");
         db.insertEvent("start", nowStr);
         updateAndSend();
@@ -49,7 +48,7 @@ public class Controller {
             }
 
             dateTime = LocalDateTime.now();
-            nowStr = dateTime.format(DateFormatter);
+            nowStr = dateTime.format(dateTimeFormatter);
             logger.debug("insert ping event");
             db.insertEvent("ping", nowStr);
             updateAndSend();

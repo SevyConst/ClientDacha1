@@ -95,7 +95,7 @@ public class Db {
              PreparedStatement statement = connection.prepareStatement(sqlUpdate.toString())) {
 
             LocalDateTime dateTime = LocalDateTime.now();
-            String nowStr = dateTime.format(Controller.DateFormatter);
+            String nowStr = dateTime.format(Controller.dateTimeFormatter);
             statement.setString(1, nowStr);
             statement.executeUpdate();
 
@@ -117,7 +117,7 @@ public class Db {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(sqlUpdate.toString())) {
             LocalDateTime dateTime = LocalDateTime.now();
-            String nowStr = dateTime.format(Controller.DateFormatter);
+            String nowStr = dateTime.format(Controller.dateTimeFormatter);
             statement.setString(1, nowStr);
             statement.executeUpdate();
 

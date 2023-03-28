@@ -17,7 +17,7 @@ public class ForProperties {
     private static final String PROPERTY_DEVICE_ID = "device_id";
     private static final String PROPERTY_PERIOD_SEC = "period";
     private static final String PROPERTY_MAX_ROWS_DB = "max_rows";
-    private static final String PROPERTY_SLEEP_REMOVING = "sleep_removing";
+    private static final String PROPERTY_SLEEP_REMOVING = "sleep_seconds_removing";
 
     private String ip;
     private int port;
@@ -29,7 +29,7 @@ public class ForProperties {
     private long maxRows;  // For removing
     private static final long DEFAULT_MAX_ROWS = 60*60*24*90;  // 90 days
 
-    private long sleepRemoving;  // In seconds
+    private long sleepSecondsRemoving;
     private static final int DEFAULT_SLEEP_REMOVING = 60*60*24;
 
 
@@ -123,12 +123,12 @@ public class ForProperties {
         logger.info("max rows: " + maxRows);
 
         try {
-            sleepRemoving = Long.parseLong(prop.getProperty(PROPERTY_SLEEP_REMOVING));
+            sleepSecondsRemoving = Long.parseLong(prop.getProperty(PROPERTY_SLEEP_REMOVING));
         } catch (NumberFormatException e) {
             logger.warn(
                     "can't parse properties: can't read sleep removing. Using default value: " +
                             DEFAULT_SLEEP_REMOVING + " seconds", e);
-            sleepRemoving = DEFAULT_SLEEP_REMOVING;
+            sleepSecondsRemoving = DEFAULT_SLEEP_REMOVING;
         }
 
         return true;
@@ -168,8 +168,8 @@ public class ForProperties {
         return maxRows;
     }
 
-    public long getSleepRemoving() {
-        return sleepRemoving;
+    public long getSleepSecondsRemoving() {
+        return sleepSecondsRemoving;
     }
 
     public boolean getIsRpi() {

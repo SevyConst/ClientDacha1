@@ -21,7 +21,7 @@ public class Main {
         new LimitingSizeDb(
                 forProperties.getMaxRows(),
                 db,
-                forProperties.getSleepRemoving(),
+                forProperties.getSleepSecondsRemoving(),
                 logger);
 
         httpClient httpClient = new httpClient(
